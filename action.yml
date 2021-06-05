@@ -1,0 +1,36 @@
+name: 'Content-Queue Tweet'
+description: 'Tweet pending post'
+inputs:
+  cardContent:
+    description: 'Parsed post metadata'
+    required: true
+  retweetHeading:
+    description: 'Heading where an URL to retweet is stored'
+    default: 'Retweet'
+  replyToHeading:
+    description: 'Heading where an URL to a tweet to reply to is stored'
+    default: 'Reply to'
+  tweetContent:
+    description: 'Heading where the tweet content is stored'
+    default: 'Content'
+  column:
+    description: 'Column where issues ready to tweet are stored'
+    default: 'To Tweet'
+  twitterConsumerKey:
+    description: 'Twitter Consumer Key'
+    required: true
+  twitterConsumerSecret:
+    description: 'Twitter Consumer Secret'
+    required: true
+  twitterAccessTokenKey:
+    description: 'Twitter Access Token'
+    required: true
+  twitterAccessTokenSecret:
+    description: 'Twitter Access Token Secret'
+    required: true
+  token:
+    description: 'GitHub token'
+    required: true
+runs:
+  using: 'node12'
+  main: 'index.js'
