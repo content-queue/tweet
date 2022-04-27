@@ -54,10 +54,10 @@ async function doStuff() {
             return;
         }
         const twitterClient = new TwitterApi({
-            appKey: core.getInput('twitterConsumerKey'),
-            appSecret: core.getInput('twitterConsumerSecret'),
-            accessToken: core.getInput('twitterAccessTokenKey'),
-            accessSecret: core.getInput('twitterAccessTokenSecret'),
+            appKey: core.getInput('twitterApiKey'),
+            appSecret: core.getInput('twitterApiSecret'),
+            accessToken: core.getInput('twitterAccessToken'),
+            accessSecret: core.getInput('twitterAccessSecret'),
         });
         const { data: userInfo } = await twitterClient.v2.me();
         const content = cardContent[core.getInput('tweetContent')];
