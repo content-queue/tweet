@@ -16,6 +16,9 @@ inputs:
   column:
     description: 'Column where issues ready to tweet are stored'
     default: 'To Tweet'
+  doneColumn:
+    description: "Column where tweeted issues should be stored"
+    default: 'Tweeted'
   twitterApiKey:
     description: 'Twitter Consumer API Key'
     required: true
