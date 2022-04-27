@@ -45,7 +45,7 @@ function getTweetIdFromUrl(url) {
 
 async function doStuff() {
     const issue = await getIssue();
-    const { data: column } = await ocotokit.projects.getColumn({ column_id: github.context.payload.project_card.column_id });
+    const { data: column } = await octokit.projects.getColumn({ column_id: github.context.payload.project_card.column_id });
     if(issue.state === "open" && column.name === core.getInput('column')) {
         const cardContent = JSON.parse(core.getInput('cardContent'));
 
