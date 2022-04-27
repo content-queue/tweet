@@ -12,7 +12,7 @@ inputs:
     default: 'Reply to'
   tweetContent:
     description: 'Heading where the tweet content is stored'
-    default: 'Tweet Content'
+    default: 'Content'
   column:
     description: 'Column where issues ready to tweet are stored'
     default: 'To Tweet'
