@@ -3,8 +3,7 @@
 const core = require('@actions/core'),
     github = require('@actions/github'),
     twitter = require('twitter-text'),
-    Twitter = require('twitter'),
-    fetch = require('fetch-base64'),
+    { TwitterApi } = require('twitter-api-v2'),
     token = core.getInput('token'),
     octokit = github.getOctokit(token),
     MAX_WEIGHTED_LENGTH = 280;
@@ -54,19 +53,19 @@ async function doStuff() {
             core.info('Ignoring scheduled tweets for now.');
             return;
         }
-        const twitterClient = new Twitter({
-            consumer_key: core.getInput('twitterConsumerKey'),
-            consumer_secret: core.getInput('twitterConsumerSecret'),
-            access_token_key: core.getInput('twitterAccessTokenKey'),
-            access_token_secret: core.getInput('twitterAccessTokenSecret'),
+        const twitterClient = new TwitterApi({
+            appKey: core.getInput('twitterApiKey'),
+            appSecret: core.getInput('twitterApiSecret'),
+            accessToken: core.getInput('twitterAccessToken'),
+            accessSecret: core.getInput('twitterAccessSecret'),
         });
-        const verifyResult = await twitterClient.get('account/verify_credentials', {});
+        const { data: userInfo } = await twitterClient.v2.me();
         const content = cardContent[core.getInput('tweetContent')];
         const retweetUrl = cardContent[core.getInput('retweetHeading')];
         let resultMessage;
         if(retweetUrl && !content) {
             const retweetId = getTweetIdFromUrl(retweetUrl);
-            await twitterClient.post(`statuses/retweet/${retweetId}`, {});
+            await twitterClient.v2.retweet(userInfo.id, retweetId);
             resultMessage = 'Successfully retweeted.';
         }
         else {
@@ -76,35 +75,21 @@ async function doStuff() {
                 throw new Error(`Tweet content too long by ${parsedTweet.weightedLength - MAX_WEIGHTED_LENGTH} weighted characters.`);
             }
 
-            const uploadedMedia = await Promise.all(media.map(async (url) => {
-                const [ media_data ] = await fetch.remote(url);
-                const args = {
-                    media_data,
-                };
-                const response = await twitterClient.post('media/upload', args);
-                return response.media_id_string;
-            }));
-            const args = {
-                status: tweet,
-            };
+            if (media.length > 0) {
+                throw new Error('Media is not supported yet. Please remove the image from the tweet content.');
+            }
+
+            const args = {};
             const replyToUrl = cardContent[core.getInput('replyToHeading')];
             const replyToId = getTweetIdFromUrl(replyToUrl);
             if(replyToId) {
-                args.in_reply_to_status_id = replyToId;
-                const user = /^https?:\/\/(?:www\.)?twitter.com\/([^/]+)\/status\/[0-9]+\/?$/.exec(replyToUrl);
-                const mentions = twitter.extractMentions(tweet).map((mention) => mention.toLowerCase());
-                if(!mentions.length || !mentions.includes(user[1].toLowerCase())) {
-                    args.auto_populate_reply_metadata = "true";
-                }
+                args.reply = { in_reply_to_tweet_id: replyToId };
             }
             if(retweetUrl) {
                 args.attachment_url = retweetUrl;
             }
-            if(uploadedMedia.length) {
-                args.media_ids = uploadedMedia;
-            }
-            const tweetInfo = await twitterClient.post('statuses/update', args);
-            resultMessage = `Successfully tweeted: https://twitter.com/${verifyResult.screen_name}/status/${tweetInfo.id_str}`;
+            const { data: tweetInfo } = await twitterClient.v2.tweet(tweet, args);
+            resultMessage = `Successfully tweeted: https://twitter.com/${userInfo.username}/status/${tweetInfo.id}`;
         }
         await octokit.rest.issues.createComment({
             ...github.context.repo,
@@ -119,4 +104,7 @@ async function doStuff() {
     }
 }
 
-doStuff().catch((error) => core.setFailed(error.message));
+doStuff().catch((error) => {
+    console.error(error);
+    core.setFailed(error.message);
+});

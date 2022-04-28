@@ -16,16 +16,16 @@ inputs:
   column:
     description: 'Column where issues ready to tweet are stored'
     default: 'To Tweet'
-  twitterConsumerKey:
-    description: 'Twitter Consumer Key'
+  twitterApiKey:
+    description: 'Twitter Consumer API Key'
     required: true
-  twitterConsumerSecret:
-    description: 'Twitter Consumer Secret'
+  twitterApiSecret:
+    description: 'Twitter Consumer API Secret'
     required: true
-  twitterAccessTokenKey:
+  twitterAccessToken:
     description: 'Twitter Access Token'
     required: true
-  twitterAccessTokenSecret:
+  twitterAccessSecret:
     description: 'Twitter Access Token Secret'
     required: true
   token:
