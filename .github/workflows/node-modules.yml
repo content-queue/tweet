@@ -1,0 +1,25 @@
+name: node_modules
+on:
+  push:
+    paths:
+    - package-lock.json
+    branches:
+    - main
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+      - run: npm ci --no-audit --production
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add ./node_modules
+          git commit -m "chore: add node_modules updates"
+          git push origin HEAD:main
