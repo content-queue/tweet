@@ -42,6 +42,11 @@ function getTweetIdFromUrl(url) {
     return match?.[1] ?? null;
 }
 
+function getProjectIdFromUrl(url) {
+    const match = /^https?:\/\/api\.github.com\/projects\/([0-9]+)\/?$/.exec(url);
+    return match?.[1] ?? null;
+}
+
 async function doStuff() {
     const issue = await getIssue();
     const { data: column } = await octokit.rest.projects.getColumn({ column_id: github.context.payload.project_card.column_id });
@@ -100,6 +105,15 @@ async function doStuff() {
             ...github.context.repo,
             issue_number: issue.number,
             state: 'closed',
+        });
+        const availableColumns = await octokit.rest.projects.listColumns({
+            project_id: getProjectIdFromUrl(github.context.payload.project_card.project_url),
+        });
+        const { id: doneColumnId } = availableColumns.data.find((column) => column.name === core.getInput('doneColumn'));
+        await octokit.rest.projects.moveCard({
+            card_id: github.context.payload.project_card.id,
+            column_id: doneColumnId,
+            position: 'top',
         });
     }
 }
